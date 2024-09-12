@@ -1,0 +1,9 @@
+SERVER_PORT: 0
+CONTEXT_PATH: /api
+
+############# DATABASE INFO ##################
+DATABASE_URL: localhost
+DATABASE_PASSWORD: 061201
+DATABASE_USERNAME: postgres
+DATABASE_NAME: InventoryService
+DATABASE_PORT: 5432

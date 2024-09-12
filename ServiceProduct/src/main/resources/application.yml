@@ -1,0 +1,30 @@
+server:
+  port: ${SERVER_PORT:8081}
+  servlet:
+    contextPath: ${CONTEXT_PATH:/api}
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka
+spring:
+  datasource:
+    password: ${DATABASE_PASSWORD}
+    username: ${DATABASE_USERNAME}
+    url: jdbc:postgresql://${DATABASE_URL}:${DATABASE_PORT}/${DATABASE_NAME:ProductService}
+    driver-class-name: org.postgresql.Driver
+  profiles:
+    active: local
+
+  jpa:
+    database: postgresql
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    properties:
+      hibernate:
+        jdbc.batch_size: 30
+        order_inserts: true
+        jdbc.time_zone: UTC
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        types.print.banner: false
+        format_sql: true
