@@ -5,7 +5,9 @@ import java.util.List;
 import java.util.UUID;
 
 import com.Peaqock.order_service.Dto.InventoryResponse;
+import com.Peaqock.order_service.Events.OrderPlacedEvent;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -26,6 +28,8 @@ public class OrderService {
 
 	private final WebClient.Builder webClientBuilder;
 	private final OrderRepository orderRepository;
+	private final KafkaTemplate<String,OrderPlacedEvent> kafkaTemplate;
+
 	public String placeOrder(OrderRequest orderRequest) {
 		Order order = new Order();
 		order.setOrderNumber(UUID.randomUUID().toString()); 
@@ -50,6 +54,7 @@ public class OrderService {
 
 		if(isInStock){
 			orderRepository.save(order);
+			kafkaTemplate.send("notificationTopic", new OrderPlacedEvent(order.getOrderNumber()));
 			return "Order placed successfully";
 		}else{
 			throw new IllegalArgumentException("Product is not in stock, please try again later");
