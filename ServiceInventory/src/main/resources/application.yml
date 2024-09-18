@@ -3,6 +3,8 @@ server:
   servlet:
     contextPath: ${CONTEXT_PATH:/api}
 spring:
+  application:
+    name: inventory-service
   datasource:
     password: ${DATABASE_PASSWORD}
     username: ${DATABASE_USERNAME}

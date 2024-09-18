@@ -6,6 +6,7 @@ import java.util.UUID;
 
 import com.Peaqock.order_service.Dto.InventoryResponse;
 import com.Peaqock.order_service.Events.OrderPlacedEvent;
+import com.Peaqock.order_service.FeignClient.InventoryFeign;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
@@ -28,6 +29,7 @@ public class OrderService {
 
 	private final WebClient.Builder webClientBuilder;
 	private final OrderRepository orderRepository;
+	private  final InventoryFeign inventoryFeign;
 	private final KafkaTemplate<String,OrderPlacedEvent> kafkaTemplate;
 
 	public String placeOrder(OrderRequest orderRequest) {
@@ -39,7 +41,7 @@ public class OrderService {
 		order.setOrderLineItems(orderLineItems);
 		List<String> skuCodes = order.getOrderLineItems().stream().map(OrderLineItems::getSkuCode).toList();
 		//call Inventory service, and place order if product is in stock
-		InventoryResponse [] inventoryResponses = webClientBuilder.build().get()
+		/*InventoryResponse [] inventoryResponses = webClientBuilder.build().get()
 				.uri("http://inventory-service/api/inventory",uriBuilder -> uriBuilder.queryParam("skuCode",skuCodes).build())
 						.retrieve()
 								.bodyToMono(InventoryResponse[].class)
@@ -49,9 +51,10 @@ public class OrderService {
 
 			System.out.println("is in stock "+inventoryResponse.isInStock());
 			System.out.println(inventoryResponse.getSkuCode());
-		}
-		boolean isInStock = Arrays.stream(inventoryResponses).allMatch(InventoryResponse::isInStock);
-
+		}*/
+		List<InventoryResponse>  inventoryResponses = inventoryFeign.isInStock(skuCodes);
+		//boolean isInStock = Arrays.stream(inventoryResponses).allMatch(InventoryResponse::isInStock);
+		boolean isInStock = inventoryResponses.stream().allMatch(InventoryResponse::isInStock);
 		if(isInStock){
 			orderRepository.save(order);
 			kafkaTemplate.send("notificationTopic", new OrderPlacedEvent(order.getOrderNumber()));
